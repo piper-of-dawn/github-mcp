@@ -1,0 +1,67 @@
+services:
+  github-mcp:
+    image: ${MCP_IMAGE:-github-mcp:local}
+    pull_policy: never
+    user: "65532:65532"
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 15s
+    ports:
+      - "${MCP_PUBLISH_HOST:-127.0.0.1}:${MCP_HOST_PORT:-8082}:8082"
+    environment:
+      GITHUB_HOST: ${GITHUB_HOST:?Set GITHUB_HOST in .env}
+      GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_PERSONAL_ACCESS_TOKEN:-}
+      GITHUB_TOOLSETS: ${GITHUB_TOOLSETS:-repos,pull_requests}
+      GITHUB_TOOLS: ${GITHUB_TOOLS:-}
+      GITHUB_READ_ONLY: ${GITHUB_READ_ONLY:-true}
+      GITHUB_LOCKDOWN_MODE: ${GITHUB_LOCKDOWN_MODE:-false}
+      MCP_HOST_PORT: ${MCP_HOST_PORT:-8082}
+      MCP_BIND_HOST: ${MCP_BIND_HOST:-0.0.0.0}
+      MCP_BASE_URL: ${MCP_BASE_URL:-}
+      MCP_BASE_PATH: ${MCP_BASE_PATH:-/mcp}
+      MCP_SCOPE_CHALLENGE: ${MCP_SCOPE_CHALLENGE:-false}
+      GITHUB_AUTHORIZATION_SERVER: ${GITHUB_AUTHORIZATION_SERVER:-}
+      CONTAINER_REPO_PATH: ${CONTAINER_REPO_PATH:-/work/repo}
+      CONTAINER_TMP_DIR: ${CONTAINER_TMP_DIR:-/work/tmp}
+      CONTAINER_LOG_DIR: ${CONTAINER_LOG_DIR:-/work/logs}
+      CUSTOM_CA_CERT_PATH: /run/enterprise-ca.pem
+      CA_BUNDLE_PATH: ${CA_BUNDLE_PATH:-/etc/ssl/certs/ca-certificates.crt}
+      PRESTART_TEST_MODE: ${PRESTART_TEST_MODE:-live}
+      TEST_REPO_OWNER: ${TEST_REPO_OWNER:-}
+      TEST_REPO_NAME: ${TEST_REPO_NAME:-}
+      TEST_REPO_BRANCH: ${TEST_REPO_BRANCH:-main}
+      TEST_REPO_FILE_PATH: ${TEST_REPO_FILE_PATH:-README.md}
+      TEST_PR_NUMBER: ${TEST_PR_NUMBER:-}
+      TEST_TIMEOUT_SECONDS: ${TEST_TIMEOUT_SECONDS:-30}
+      TEST_RETRIES: ${TEST_RETRIES:-1}
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1}
+      http_proxy: ${HTTP_PROXY:-}
+      https_proxy: ${HTTPS_PROXY:-}
+      no_proxy: ${NO_PROXY:-localhost,127.0.0.1}
+    volumes:
+      - type: bind
+        source: ${HOST_REPO_PATH:-.}
+        target: ${CONTAINER_REPO_PATH:-/work/repo}
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${HOST_TMP_DIR:-./tmp}
+        target: ${CONTAINER_TMP_DIR:-/work/tmp}
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${LOG_DIR:-./logs}
+        target: ${CONTAINER_LOG_DIR:-/work/logs}
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${CUSTOM_CA_CERT_PATH:-/dev/null}
+        target: /run/enterprise-ca.pem
+        read_only: true
+        bind:
+          create_host_path: false

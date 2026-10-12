@@ -1,0 +1,7 @@
+**
+!Dockerfile
+!github-mcp-server
+!entrypoint.sh
+!tests/
+!tests/test_mcp.py
+!tests/test_startup.sh
